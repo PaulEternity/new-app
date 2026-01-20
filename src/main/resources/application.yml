@@ -1,6 +1,12 @@
 spring:
   application:
     name: app-gen
+    # mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/appgen
+    username: root
+    password: GYh031125
 server:
     port: 8123
     servlet:
