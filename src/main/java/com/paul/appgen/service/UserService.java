@@ -1,12 +1,16 @@
 package com.paul.appgen.service;
 
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 import com.paul.appgen.model.dto.user.UserLoginRequest;
+import com.paul.appgen.model.dto.user.UserQueryRequest;
 import com.paul.appgen.model.entity.User;
 import com.paul.appgen.model.vo.LoginUserVO;
+import com.paul.appgen.model.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.net.http.HttpRequest;
+import java.util.List;
 
 /**
  * 用户 服务层。
@@ -31,4 +35,9 @@ public interface UserService extends IService<User> {
 
     boolean userLogout(HttpServletRequest httpServletRequest);
 
+    UserVO getUserVO(User user);
+
+    List<UserVO> getUserVOList(List<User> userList);
+
+    QueryWrapper getQueryWrapper(UserQueryRequest userQueryRequest);
 }

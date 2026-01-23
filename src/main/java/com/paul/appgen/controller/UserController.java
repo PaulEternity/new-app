@@ -1,8 +1,10 @@
 package com.paul.appgen.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import com.paul.appgen.annotation.AuthCheck;
 import com.paul.appgen.common.BaseResponse;
 import com.paul.appgen.common.ResultUtils;
+import com.paul.appgen.constant.UserConstant;
 import com.paul.appgen.exception.ErrorCode;
 import com.paul.appgen.exception.ThrowUtils;
 import com.paul.appgen.model.dto.user.UserLoginRequest;
@@ -73,6 +75,7 @@ public class UserController {
      * @return {@code true} 保存成功，{@code false} 保存失败
      */
     @PostMapping("save")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public boolean save(@RequestBody User user) {
         return userService.save(user);
     }
