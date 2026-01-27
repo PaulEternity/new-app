@@ -18,6 +18,13 @@ langchain4j:
       max-tokens: 8192
       strict-json-schema: true
       response-format: json_object
+    streaming-chat-model:
+      base-url: https://api.deepseek.com
+      api-key: sk-2a98a8acec8e49019b326c43a9ec68b4
+      model-name: deepseek-chat
+      max-tokens: 8192
+      log-requests: true
+      log-responses: true
 server:
     port: 8123
     servlet:
