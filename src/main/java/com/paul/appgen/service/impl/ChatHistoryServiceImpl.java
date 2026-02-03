@@ -16,6 +16,7 @@ import com.paul.appgen.model.enums.ChatHistoryMessageTypeEnum;
 import com.paul.appgen.service.AppService;
 import com.paul.appgen.service.ChatHistoryService;
 import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory>  implements ChatHistoryService{
 
     @Resource
+    @Lazy
     private AppService appService;
 
 /**
