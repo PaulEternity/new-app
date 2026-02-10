@@ -6,6 +6,7 @@ import com.mybatisflex.core.service.IService;
 import com.paul.appgen.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.paul.appgen.model.entity.ChatHistory;
 import com.paul.appgen.model.entity.User;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 
 import java.time.LocalDateTime;
 
@@ -26,4 +27,5 @@ public interface ChatHistoryService extends IService<ChatHistory> {
                                                       LocalDateTime lastCreateTime,
                                                       User loginUser);
 
+    public int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory,int maxCount);
 }

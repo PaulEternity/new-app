@@ -1,6 +1,7 @@
 package com.paul.appgen.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.esotericsoftware.minlog.Log;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -15,11 +16,16 @@ import com.paul.appgen.mapper.ChatHistoryMapper;
 import com.paul.appgen.model.enums.ChatHistoryMessageTypeEnum;
 import com.paul.appgen.service.AppService;
 import com.paul.appgen.service.ChatHistoryService;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 对话历史 服务层实现。
@@ -27,6 +33,7 @@ import java.time.LocalDateTime;
  * @author <a href="https://github.com"></a>
  */
 @Service
+@Slf4j
 public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory>  implements ChatHistoryService{
 
     @Resource
@@ -76,7 +83,7 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         // 参数校验：appId不能为null且必须大于0，否则抛出参数错误异常
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR,"应用ID不能为空");
         // 创建查询条件，设置app_id等于传入的appId
-        QueryWrapper queryWrapper = QueryWrapper.create().eq("app_id",appId);
+        QueryWrapper queryWrapper = QueryWrapper.create().eq("appId", appId);
         // 执行删除操作并返回结果
         return this.remove(queryWrapper);
     }
@@ -143,6 +150,36 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
         return this.page(Page.of(1, pageSize), queryWrapper);
     }
 
-
+    @Override
+    public int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory,int maxCount){
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用ID不能为空");
+        ThrowUtils.throwIf(chatMemory == null, ErrorCode.PARAMS_ERROR, "聊天内存对象不能为空");
+        try {
+            QueryWrapper queryWrapper = QueryWrapper.create()
+                    .eq(ChatHistory::getAppId,appId)
+                    .orderBy(ChatHistory::getCreateTime,false)
+                    .limit(0, maxCount);
+            List<ChatHistory> chatHistoryList = this.list(queryWrapper);
+            if(chatHistoryList == null || chatHistoryList.isEmpty()){
+                return 0;
+            }
+            chatHistoryList = chatHistoryList.reversed();
+            int loadedCount = 0;
+            chatMemory.clear();
+            for (ChatHistory chatHistory : chatHistoryList) {
+                if(ChatHistoryMessageTypeEnum.USER.getValue().equals(chatHistory.getMessageType())){
+                    chatMemory.add(UserMessage.from(chatHistory.getMessage()));
+                } else if(ChatHistoryMessageTypeEnum.AI.getValue().equals(chatHistory.getMessageType())){
+                    chatMemory.add(AiMessage.from(chatHistory.getMessage()));
+                    loadedCount++;
+                }
+            }
+            log.info("成功为appId:{} 加载聊天历史到内存，共加载{}条",appId,loadedCount);
+            return loadedCount;
+        }catch (Exception e){
+            log.info("为appId:{} 加载聊天历史到内存失败",appId,e);
+            return 0;
+        }
+    }
 
 }
