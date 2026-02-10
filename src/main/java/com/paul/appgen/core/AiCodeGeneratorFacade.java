@@ -116,15 +116,15 @@ public class AiCodeGeneratorFacade {
      * @param userMessage 用户输入的消息内容，用于生成HTML代码
      * @return 返回生成的HTML文件对象
      */
-    @Deprecated
-    private File generateAndSaveHtmlCode(String userMessage) {
-        // 调用AI代码生成服务生成HTML代码
-        HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
-        // 保存HTML文件（第一次保存，但返回值未被使用）
-        CodeFileSaver.saveHtmlFile(htmlCodeResult);
-        // 再次保存HTML文件并返回文件对象
-        return CodeFileSaver.saveHtmlFile(htmlCodeResult);
-    }
+//    @Deprecated
+//    private File generateAndSaveHtmlCode(String userMessage) {
+//        // 调用AI代码生成服务生成HTML代码
+//        HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
+//        // 保存HTML文件（第一次保存，但返回值未被使用）
+//        CodeFileSaver.saveHtmlFile(htmlCodeResult);
+//        // 再次保存HTML文件并返回文件对象
+//        return CodeFileSaver.saveHtmlFile(htmlCodeResult);
+//    }
 
 
     /**
@@ -135,13 +135,13 @@ public class AiCodeGeneratorFacade {
      * @param userMessage 用户输入的消息，用于生成代码的依据
      * @return File 返回保存生成的代码文件后的文件对象
      */
-    @Deprecated
-    private File generateAndSaveMultiFileCode(String userMessage) {
-        // 调用AI代码生成服务生成多文件代码
-        MultiFileCodeResult result = aiCodeGeneratorService.generateMultiFileCode(userMessage);
-        // 调用代码文件保存服务，将生成的代码保存到文件系统并返回文件对象
-        return CodeFileSaver.saveMultiFileCode(result);
-    }
+//    @Deprecated
+//    private File generateAndSaveMultiFileCode(String userMessage) {
+//        // 调用AI代码生成服务生成多文件代码
+//        MultiFileCodeResult result = aiCodeGeneratorService.generateMultiFileCode(userMessage);
+//        // 调用代码文件保存服务，将生成的代码保存到文件系统并返回文件对象
+//        return CodeFileSaver.saveMultiFileCode(result);
+//    }
 
     /**
      * 生成并保存多文件代码流的方法
@@ -150,11 +150,11 @@ public class AiCodeGeneratorFacade {
      * @param userMessage 用户输入的消息，用于生成代码
      * @return 返回一个Flux<String>，表示生成的代码流
      */
-    @Deprecated
-    private Flux<String> generateAndSaveMultiFileCodeStream(String userMessage,Long appId) {
-        Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
-        return processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE,appId);
-    }
+//    @Deprecated
+//    private Flux<String> generateAndSaveMultiFileCodeStream(String userMessage,Long appId) {
+//        Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
+//        return processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE,appId);
+//    }
 
     /**
      * 生成并保存HTML代码流
@@ -163,9 +163,9 @@ public class AiCodeGeneratorFacade {
      * @param userMessage 用户输入的消息，用于生成HTML代码
      * @return 返回一个Flux<String>，表示生成的HTML代码流
      */
-    @Deprecated
-    private Flux<String> generateAndSaveHtmlCodeStream(String userMessage,Long appId) {
-        Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
-        return processCodeStream(codeStream, CodeGenTypeEnum.HTML,appId);
-    }
+//    @Deprecated
+//    private Flux<String> generateAndSaveHtmlCodeStream(String userMessage,Long appId) {
+//        Flux<String> codeStream = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
+//        return processCodeStream(codeStream, CodeGenTypeEnum.HTML,appId);
+//    }
 }
