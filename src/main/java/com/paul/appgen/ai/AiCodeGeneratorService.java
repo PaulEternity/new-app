@@ -48,4 +48,7 @@ public interface AiCodeGeneratorService {
      */
     @SystemMessage(value = "prompt/codegen-multi-file-system-prompt.txt")
     Flux<String> generateMultiFileCodeStream(String userMessage);
+
+    @SystemMessage(value = "prompt/codegen-vue-system-prompt.txt")
+    Flux<String> generateVueProjectCodeStream(@MemoryId Long appId, @UserMessage String userMessage);
 }

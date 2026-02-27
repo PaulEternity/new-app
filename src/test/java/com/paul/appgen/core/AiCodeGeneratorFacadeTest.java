@@ -31,4 +31,13 @@ class AiCodeGeneratorFacadeTest {
         String join = String.join("", result);
         Assertions.assertNotNull(join);
     }
+
+    @Test
+    void generateVueProjectCodeStream() {
+        Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream("生成一个登录页面，20行代码以内", CodeGenTypeEnum.VUE_PROJECT, 374079992261226496L);
+        List<String> result = codeStream.collectList().block();
+        Assertions.assertNotNull(result);
+        String join = String.join("", result);
+        Assertions.assertNotNull(join);
+    }
 }
