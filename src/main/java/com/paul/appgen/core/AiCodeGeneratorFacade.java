@@ -1,14 +1,22 @@
 package com.paul.appgen.core;
 
+import cn.hutool.json.JSONUtil;
 import com.paul.appgen.ai.AiCodeGeneratorFactory;
 import com.paul.appgen.ai.AiCodeGeneratorService;
 import com.paul.appgen.ai.model.HtmlCodeResult;
 import com.paul.appgen.ai.model.MultiFileCodeResult;
+import com.paul.appgen.ai.model.message.AiResponseMessage;
+import com.paul.appgen.ai.model.message.ToolExecutedMessage;
+import com.paul.appgen.ai.model.message.ToolRequestMessage;
+import com.paul.appgen.constant.AppConstant;
 import com.paul.appgen.core.parser.CodeParserExecutor;
 import com.paul.appgen.core.saver.CodeFileSaverExecutor;
 import com.paul.appgen.exception.BusinessException;
 import com.paul.appgen.exception.ErrorCode;
 import com.paul.appgen.model.enums.CodeGenTypeEnum;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -76,14 +84,42 @@ public class AiCodeGeneratorFacade {
                 yield processCodeStream(codeStream, CodeGenTypeEnum.MULTI_FILE,appId);
             }
             case VUE_PROJECT -> {
-                Flux<String> codeStream = aiCodeGeneratorService.generateVueProjectCodeStream(appId,userMessage);
-                yield processCodeStream(codeStream, CodeGenTypeEnum.VUE_PROJECT,appId);
+                TokenStream codeStream = aiCodeGeneratorService.generateVueProjectCodeStream(appId,userMessage);
+                yield processTokenStream(codeStream);
             }
             default -> {
                 String errorMessage = "不支持的生成类型" + codeGenTypeEnum.getValue();
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, errorMessage);
             }
         };
+    }
+
+    private Flux<String> processTokenStream(TokenStream tokenStream) {
+        return Flux.create(sink -> {
+            tokenStream.onPartialResponse((String partialResponse) -> {
+                        AiResponseMessage aiResponseMessage = new AiResponseMessage(partialResponse);
+                        sink.next(JSONUtil.toJsonStr(aiResponseMessage));
+                    })
+                    .onPartialToolExecutionRequest((index, toolExecutionRequest) -> {
+                        ToolRequestMessage toolRequestMessage = new ToolRequestMessage(toolExecutionRequest);
+                        sink.next(JSONUtil.toJsonStr(toolRequestMessage));
+                    })
+                    .onToolExecuted((ToolExecution toolExecution) -> {
+                        ToolExecutedMessage toolExecutedMessage = new ToolExecutedMessage(toolExecution);
+                        sink.next(JSONUtil.toJsonStr(toolExecutedMessage));
+                    })
+                    .onCompleteResponse((ChatResponse response) -> {
+                        // 执行 Vue 项目构建（同步执行，确保预览时项目已就绪）
+//                        String projectPath = AppConstant.CODE_OUTPUT_ROOT_DIR + "/vue_project_" + appId;
+//                        vueProjectBuilder.buildProject(projectPath);
+                        sink.complete();
+                    })
+                    .onError((Throwable error) -> {
+                        error.printStackTrace();
+                        sink.error(error);
+                    })
+                    .start();
+        });
     }
 
 

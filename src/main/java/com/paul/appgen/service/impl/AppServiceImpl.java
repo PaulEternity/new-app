@@ -10,6 +10,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.paul.appgen.constant.AppConstant;
 import com.paul.appgen.core.AiCodeGeneratorFacade;
+import com.paul.appgen.core.handler.StreamHandlerExecutor;
 import com.paul.appgen.exception.BusinessException;
 import com.paul.appgen.exception.ErrorCode;
 import com.paul.appgen.exception.ThrowUtils;
@@ -57,6 +58,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Resource
     private ChatHistoryService chatHistoryService;
 
+    @Resource
+    private StreamHandlerExecutor streamHandlerExecutor;
+
 
     /**
      * 处理用户生成代码的请求
@@ -92,19 +96,21 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         }
         // 将用户消息添加到聊天历史记录中
         chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
-        Flux<String> contentFlux = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
-        StringBuilder aiResponseBuilder = new StringBuilder();
-        return contentFlux.map(chunk -> {
-            aiResponseBuilder.append(chunk);
-            return chunk;
-        }).doOnComplete(() -> {
-            String aiResponse = aiResponseBuilder.toString();
-            chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-        }).doOnError(error -> {
-            String errorMessage = error.getMessage();
-            chatHistoryService.addChatMessage(appId, errorMessage, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-        });
+        Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
+        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum);
         // 调用AI代码生成门面，生成并保存代码，返回代码片段流
+
+//        StringBuilder aiResponseBuilder = new StringBuilder();
+//        return contentFlux.map(chunk -> {
+//            aiResponseBuilder.append(chunk);
+//            return chunk;
+//        }).doOnComplete(() -> {
+//            String aiResponse = aiResponseBuilder.toString();
+//            chatHistoryService.addChatMessage(appId, aiResponse, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+//        }).doOnError(error -> {
+//            String errorMessage = error.getMessage();
+//            chatHistoryService.addChatMessage(appId, errorMessage, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
+//        });
     }
 
     /**
