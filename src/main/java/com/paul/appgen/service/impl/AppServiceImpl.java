@@ -10,6 +10,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.paul.appgen.constant.AppConstant;
 import com.paul.appgen.core.AiCodeGeneratorFacade;
+import com.paul.appgen.core.builder.VueProjectBuilder;
 import com.paul.appgen.core.handler.StreamHandlerExecutor;
 import com.paul.appgen.exception.BusinessException;
 import com.paul.appgen.exception.ErrorCode;
@@ -60,6 +61,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private StreamHandlerExecutor streamHandlerExecutor;
+
+    @Resource
+    private VueProjectBuilder vueProjectBuilder;
 
 
     /**
@@ -195,6 +199,11 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 校验代码生成目录是否存在
         if (!sourceDir.exists() || !sourceDir.isDirectory()) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "代码生成目录不存在，请先生成应用");
+        }
+        CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(codeGenType);
+        if(codeGenTypeEnum == CodeGenTypeEnum.VUE_PROJECT){
+            boolean buildSuccess = vueProjectBuilder.buildProject(sourceDirPath);
+            ThrowUtils.throwIf(!buildSuccess, ErrorCode.OPERATION_ERROR, "构建项目失败，请重试！");
         }
         // 构建部署目录路径并复制代码文件
         String deployDirPath = AppConstant.CODE_DEPLOY_ROOT_DIR + File.separator + deployKey;
