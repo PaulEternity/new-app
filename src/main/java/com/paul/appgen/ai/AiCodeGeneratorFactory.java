@@ -3,7 +3,7 @@ package com.paul.appgen.ai;
 import com.esotericsoftware.minlog.Log;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.paul.appgen.ai.tools.FileWriteTool;
+import com.paul.appgen.ai.tools.*;
 import com.paul.appgen.exception.BusinessException;
 import com.paul.appgen.exception.ErrorCode;
 import com.paul.appgen.model.enums.CodeGenTypeEnum;
@@ -75,7 +75,14 @@ public class AiCodeGeneratorFactory {
                     .chatModel(chatModel) // 设置常规聊天模型
                     .streamingChatModel(reasoningStreamingChatModel) // 设置流式聊天模型
                     .chatMemoryProvider(memoryId -> chatMemory)
-                    .tools(new FileWriteTool())
+                    .tools(
+                            new FileWriteTool(),
+                            new FileDeleteTool(),
+                            new FileReadTool(),
+                            new FileDirReadTool(),
+                            new FileModifyTool(),
+                            new ExitTool()
+                    )
                     //处理工具调用幻觉问题
                     .hallucinatedToolNameStrategy(toolExecutionRequest ->
                             ToolExecutionResultMessage
